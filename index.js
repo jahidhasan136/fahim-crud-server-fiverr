@@ -54,11 +54,45 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/addData/:id', async(req, res) =>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)};
+            const result = await dataCollection.findOne(query)
+            res.send(result);
+        })
+
         app.delete('/addData/:id', async (req, res) => {
             const id = req.params.id;
             const query = {_id: new ObjectId(id)}
             const result = await dataCollection.deleteOne(query)
             res.send(result);
+        })
+
+        app.put('/addData/:id', async(req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const filter = {_id: new ObjectId(id)};
+            const options = { upsert: true };
+            const updatedData = {
+                $set: {
+                    name: data.name,
+                    number: data.number,
+                    address: data.address,
+                    productSerialNo: data.productSerialNo,
+                    productModelNo: data.productModelNo,
+                    issueDate: data.issueDate,
+                    tentativeDate: data.tentativeData,
+                    productProblem: data.productProblem,
+                    productStatus: data.productStatus
+                },
+              };
+            const result = await dataCollection.updateOne(filter, updatedData, options)
+            res.send(result);
+        })
+
+        app.get('/totalData', async (req, res ) => {
+            const result = await dataCollection.estimatedDocumentCount();
+            res.send({totalData: result})
         })
 
 
