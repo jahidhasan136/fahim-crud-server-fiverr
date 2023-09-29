@@ -48,13 +48,12 @@ async function run() {
             res.send(result);
         })
 
-        
         app.get('/addData', async(req, res) => {
             const page = parseInt(req.query.page) || 0;
             const limit = parseInt(req.query.limit) || 5;
             const skip = page * limit;
             const search = req.query.search;
-            console.log(search)
+            // console.log(search)
             const query = {
                 $or: [
                     { name: { $regex: search, $options: 'i' } },
