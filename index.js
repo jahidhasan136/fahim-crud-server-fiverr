@@ -103,7 +103,7 @@ async function run() {
                     productSerialNo: data.productSerialNo,
                     productModelNo: data.productModelNo,
                     issueDate: data.issueDate,
-                    tentativeDate: data.tentativeData,
+                    tentativeDate: data.tentativeDate,
                     productProblem: data.productProblem,
                     productStatus: data.productStatus
                 },
