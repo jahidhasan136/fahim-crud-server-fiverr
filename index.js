@@ -48,25 +48,33 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/addData', async(req, res) => {
-            const page = parseInt(req.query.page) || 0;
-            const limit = parseInt(req.query.limit) || 5;
-            const skip = page * limit;
-            const search = req.query.search;
-            // console.log(search)
-            const query = {
-                $or: [
-                    { name: { $regex: search, $options: 'i' } },
-                    { productModelNo: { $regex: search, $options: 'i' } },
-                    { productProblem: { $regex: search, $options: 'i' } },
-                    { productStatus: { $regex: search, $options: 'i' } }
-                ]              
-        }
-            const result = await dataCollection.find(query).skip(skip).limit(limit).toArray()
-            // const cursor = dataCollection.find()
-            // const result = await cursor.toArray()
-            res.send(result);
-        })
+        app.get('/addData', async (req, res) => {
+            try {
+                const page = parseInt(req.query.page) || 0;
+                const limit = parseInt(req.query.limit) || 5;
+                const skip = page * limit;
+                const search = req.query.search;
+                
+                // Split the search string into an array of search terms
+                const searchTerms = search.split(' ');
+        
+                const query = {
+                    $or: [
+                        { name: { $regex: searchTerms.join('|'), $options: 'i' } },
+                        { productModelNo: { $regex: searchTerms.join('|'), $options: 'i' } },
+                        { productProblem: { $regex: searchTerms.join('|'), $options: 'i' } },
+                        { productStatus: { $regex: searchTerms.join('|'), $options: 'i' } }
+                    ]
+                };
+        
+                const result = await dataCollection.find(query).skip(skip).limit(limit).toArray();
+                res.send(result);
+            } catch (error) {
+                console.error('Fetch error:', error);
+                // Handle the error
+            }
+        });
+        
 
         app.get('/addData/:id', async(req, res) =>{
             const id = req.params.id;
