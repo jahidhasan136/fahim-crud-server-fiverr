@@ -34,7 +34,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
         const database = client.db("dataDB")
@@ -54,8 +53,6 @@ async function run() {
                 const limit = parseInt(req.query.limit) || 5;
                 const skip = page * limit;
                 const search = req.query.search;
-                
-                // Split the search string into an array of search terms
                 const searchTerms = search.split(' ');
         
                 const query = {
@@ -71,7 +68,6 @@ async function run() {
                 res.send(result);
             } catch (error) {
                 console.error('Fetch error:', error);
-                // Handle the error
             }
         });
         
