@@ -50,69 +50,33 @@ async function run() {
                 const skip = page * limit;
                 const search = req.query.search;
                 const searchTerms = search.split(' ');
-
+        
                 const query = {
-                    $and: [
-                        {
-                            name: { $regex: searchTerms[0] || '', $options: 'i' },
-                        },
-                        {
-                            productModelNo: { $regex: searchTerms[1] || '', $options: 'i' },
-                        },
-                        {
-                            productProblem: { $regex: searchTerms[2] || '', $options: 'i' },
-                        },
-                        {
-                            productStatus: { $regex: searchTerms[3] || '', $options: 'i' }
-                        }
-                    ]
+                    $and: []
                 };
-
+        
+                // Loop through search terms and add conditions for each field
+                searchTerms.forEach(term => {
+                    query.$and.push(
+                        {
+                            $or: [
+                                { name: { $regex: term, $options: 'i' } },
+                                { productModelNo: { $regex: term, $options: 'i' } },
+                                { productProblem: { $regex: term, $options: 'i' } },
+                                { productStatus: { $regex: term, $options: 'i' } }
+                            ]
+                        }
+                    );
+                });
+        
                 const result = await dataCollection.find(query).skip(skip).limit(limit).toArray();
                 res.send(result);
             } catch (error) {
                 console.error('Fetch error:', error);
+                // Handle the error
             }
         });
-
-
-
-        // app.get('/addData', async (req, res) => {
-        //     try{
-        //         const page = parseInt(req.query.page) || 0;
-        //                 const limit = parseInt(req.query.limit) || 5;
-        //                 const skip = page * limit;
-        //                 const search = req.query.search;
-        //                 const searchTerms = search.split(' ');
-
-        //                   const query = {
-        //                     $or: []
-        //                   };
-
-        //                   // Iterate over search terms and add conditions for non-empty terms
-        //                   for (let i = 0; i < searchTerms.length; i++) {
-        //                     for (let j = i + 1; j < searchTerms.length; j++) {
-        //                       const term1 = searchTerms[i];
-        //                       const term2 = searchTerms[j];
-
-        //                       if (term1 && term2) {
-        //                         query.$or.push({
-        //                           $and: [
-        //                             { name: { $regex: term1 || '', $options: 'i' } },
-        //                             { productModelNo: { $regex: term2 || '', $options: 'i' } }
-        //                           ]
-        //                         });
-        //                       }
-        //                     }
-        //                   }
-
-        //                   const result = await dataCollection.find(query).skip(skip).limit(limit).toArray();
-        //                   res.send(result);
-        //                 }
-        //                 catch{
-
-        //                 }
-        //             })
+        
 
 
         app.get('/addData/:id', async (req, res) => {
