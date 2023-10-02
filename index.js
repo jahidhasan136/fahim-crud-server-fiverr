@@ -1,5 +1,6 @@
-const express = require('express')
-const cors = require('cors')
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
@@ -9,11 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 
-// password
-// fahimCrud
-// 5DMogBHrzOz6NFzJ
-
-
 app.get('/', (req, res) => {
     res.send('Server is running')
 })
@@ -21,7 +17,7 @@ app.get('/', (req, res) => {
 
 
 
-const uri = "mongodb+srv://fahimCrud:5DMogBHrzOz6NFzJ@cluster0.rxkguw5.mongodb.net/?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.rxkguw5.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -38,9 +34,9 @@ async function run() {
 
         const database = client.db("dataDB")
         const dataCollection = database.collection("data")
-        
-        
-        app.post('/addData', async (req, res)=>{
+
+
+        app.post('/addData', async (req, res) => {
             const data = req.body;
             // console.log(req.body)
             const result = await dataCollection.insertOne(data);
@@ -55,12 +51,22 @@ async function run() {
                 const search = req.query.search;
                 const searchTerms = search.split(' ');
         
+                // Ensure that each search term is a string
+                const nameSearchTerm = String(searchTerms[0] || '');
+                const productModelNoSearchTerm = String(searchTerms[1] || '');
+                const productProblemSearchTerm = String(searchTerms[2] || '');
+                const productStatusSearchTerm = String(searchTerms[3] || '');
+        
                 const query = {
                     $or: [
-                        { name: { $regex: searchTerms.join('|'), $options: 'i' } },
-                        { productModelNo: { $regex: searchTerms.join('|'), $options: 'i' } },
-                        { productProblem: { $regex: searchTerms.join('|'), $options: 'i' } },
-                        { productStatus: { $regex: searchTerms.join('|'), $options: 'i' } }
+                        {
+                            $and: [
+                                { name: { $regex: nameSearchTerm, $options: 'i' } },
+                                { productModelNo: { $regex: productModelNoSearchTerm, $options: 'i' } },
+                                { productProblem: { $regex: productProblemSearchTerm, $options: 'i' } },
+                                { productStatus: { $regex: productStatusSearchTerm, $options: 'i' } }
+                            ]
+                        }
                     ]
                 };
         
@@ -72,24 +78,26 @@ async function run() {
         });
         
 
-        app.get('/addData/:id', async(req, res) =>{
+
+
+        app.get('/addData/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)};
+            const query = { _id: new ObjectId(id) };
             const result = await dataCollection.findOne(query)
             res.send(result);
         })
 
         app.delete('/addData/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await dataCollection.deleteOne(query)
             res.send(result);
         })
 
-        app.put('/addData/:id', async(req, res) => {
+        app.put('/addData/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body;
-            const filter = {_id: new ObjectId(id)};
+            const filter = { _id: new ObjectId(id) };
             const options = { upsert: true };
             const updatedData = {
                 $set: {
@@ -103,25 +111,25 @@ async function run() {
                     productProblem: data.productProblem,
                     productStatus: data.productStatus
                 },
-              };
+            };
             const result = await dataCollection.updateOne(filter, updatedData, options)
             res.send(result);
         })
 
-        app.get('/totalData', async (req, res ) => {
+        app.get('/totalData', async (req, res) => {
             const result = await dataCollection.estimatedDocumentCount();
-            res.send({totalData: result})
+            res.send({ totalData: result })
         })
 
 
 
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    // await client.close();
-  }
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
 }
 run().catch(console.dir);
 
