@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 
 
 
-const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.rxkguw5.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://fahimCrud:5DMogBHrzOz6NFzJ@cluster0.rxkguw5.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -50,34 +50,69 @@ async function run() {
                 const skip = page * limit;
                 const search = req.query.search;
                 const searchTerms = search.split(' ');
-        
-                // Ensure that each search term is a string
-                const nameSearchTerm = String(searchTerms[0] || '');
-                const productModelNoSearchTerm = String(searchTerms[1] || '');
-                const productProblemSearchTerm = String(searchTerms[2] || '');
-                const productStatusSearchTerm = String(searchTerms[3] || '');
-        
+
                 const query = {
-                    $or: [
+                    $and: [
                         {
-                            $and: [
-                                { name: { $regex: nameSearchTerm, $options: 'i' } },
-                                { productModelNo: { $regex: productModelNoSearchTerm, $options: 'i' } },
-                                { productProblem: { $regex: productProblemSearchTerm, $options: 'i' } },
-                                { productStatus: { $regex: productStatusSearchTerm, $options: 'i' } }
-                            ]
+                            name: { $regex: searchTerms[0] || '', $options: 'i' },
+                        },
+                        {
+                            productModelNo: { $regex: searchTerms[1] || '', $options: 'i' },
+                        },
+                        {
+                            productProblem: { $regex: searchTerms[2] || '', $options: 'i' },
+                        },
+                        {
+                            productStatus: { $regex: searchTerms[3] || '', $options: 'i' }
                         }
                     ]
                 };
-        
+
                 const result = await dataCollection.find(query).skip(skip).limit(limit).toArray();
                 res.send(result);
             } catch (error) {
                 console.error('Fetch error:', error);
             }
         });
-        
 
+
+
+        // app.get('/addData', async (req, res) => {
+        //     try{
+        //         const page = parseInt(req.query.page) || 0;
+        //                 const limit = parseInt(req.query.limit) || 5;
+        //                 const skip = page * limit;
+        //                 const search = req.query.search;
+        //                 const searchTerms = search.split(' ');
+
+        //                   const query = {
+        //                     $or: []
+        //                   };
+
+        //                   // Iterate over search terms and add conditions for non-empty terms
+        //                   for (let i = 0; i < searchTerms.length; i++) {
+        //                     for (let j = i + 1; j < searchTerms.length; j++) {
+        //                       const term1 = searchTerms[i];
+        //                       const term2 = searchTerms[j];
+
+        //                       if (term1 && term2) {
+        //                         query.$or.push({
+        //                           $and: [
+        //                             { name: { $regex: term1 || '', $options: 'i' } },
+        //                             { productModelNo: { $regex: term2 || '', $options: 'i' } }
+        //                           ]
+        //                         });
+        //                       }
+        //                     }
+        //                   }
+
+        //                   const result = await dataCollection.find(query).skip(skip).limit(limit).toArray();
+        //                   res.send(result);
+        //                 }
+        //                 catch{
+
+        //                 }
+        //             })
 
 
         app.get('/addData/:id', async (req, res) => {
