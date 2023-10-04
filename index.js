@@ -46,7 +46,7 @@ async function run() {
         app.get('/addData', async (req, res) => {
             try {
                 const page = parseInt(req.query.page) || 0;
-                const limit = parseInt(req.query.limit) || 5;
+                const limit = parseInt(req.query.limit) || 10;
                 const skip = page * limit;
                 const search = req.query.search;
                 const searchTerms = search.split(' ');
