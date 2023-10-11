@@ -50,7 +50,7 @@ async function run() {
                 const skip = page * limit;
                 const search = req.query.search;
                 const searchTerms = search.split(' ');
-        
+                
                 const query = {
                     $and: []
                 };
